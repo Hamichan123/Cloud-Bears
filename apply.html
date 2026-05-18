@@ -701,32 +701,25 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Submitting…';
 
-    const payload = {
-      handle: state.data.handle,
-      likedRetweeted: state.data.liked ? 'Yes' : 'No',
-      commentLink: state.data.commentLink,
-      wallet: state.data.wallet,
-      submittedAt: new Date().toISOString(),
-      userAgent: navigator.userAgent
-    };
-
-    // generate a friendly ticket ID
     const ticketId = 'CB-' + Date.now().toString().slice(-6);
+
+    const params = new URLSearchParams({
+      ticketId,
+      handle:  state.data.handle,
+      liked:   state.data.liked ? 'Yes' : 'No',
+      comment: state.data.commentLink,
+      wallet:  state.data.wallet,
+      ts:      new Date().toISOString()
+    });
 
     try{
       if(APPS_SCRIPT_URL){
-        // Apps Script web apps accept form-encoded bodies without CORS preflight
-        const fd = new FormData();
-        Object.entries(payload).forEach(([k,v])=>fd.append(k,v));
-        fd.append('ticketId', ticketId);
-
-        await fetch(APPS_SCRIPT_URL,{
-          method:'POST',
-          body:fd,
-          mode:'no-cors' // Apps Script web apps redirect; we don't need the response
+        await fetch(APPS_SCRIPT_URL + '?' + params.toString(), {
+          method: 'GET',
+          mode:   'no-cors'
         });
       } else {
-        console.log('[Cloud Bears] No APPS_SCRIPT_URL configured. Payload would be:',payload);
+        console.log('[Cloud Bears] No APPS_SCRIPT_URL set. Payload:', params.toString());
         await new Promise(r=>setTimeout(r,900));
       }
 
