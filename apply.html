@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apply · Cloud Bears Waitlist</title>
+<meta name="description" content="Complete four quick tasks to claim your Cloud Bears waitlist spot." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Inter:wght@400;500;600;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --peach:#F2A878;
+    --peach-soft:#FBD9BE;
+    --peach-wash:#FCE9D6;
+    --sky:#7FC4E5;
+    --sky-soft:#C7E5F2;
+    --sky-wash:#E6F2F8;
+    --cream:#FFF8EE;
+    --ink:#1F1A17;
+    --ink-soft:#3D3530;
+    --muted:#8A7E73;
+    --success:#3aa86b;
+    --danger:#d04545;
+
+    /* ====== CONFIGURATION ======
+       Replace these values with your own. The Apps Script URL
+       is the deployed Web App URL from Google Apps Script.
+    */
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  body::before{
+    content:'';position:fixed;inset:0;
+    pointer-events:none;z-index:1;opacity:.3;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.1, 0 0 0 0 0.08, 0 0 0 0 0.07, 0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.45;pointer-events:none;z-index:0}
+  .blob.b1{width:420px;height:420px;background:var(--sky-soft);top:-80px;left:-80px;animation:float 20s ease-in-out infinite}
+  .blob.b2{width:450px;height:450px;background:var(--peach-soft);bottom:-120px;right:-120px;animation:float 25s ease-in-out infinite reverse}
+  @keyframes float{
+    0%,100%{transform:translate(0,0) scale(1)}
+    50%{transform:translate(30px,-20px) scale(1.05)}
+  }
+
+  /* mini-nav */
+  .mini-nav{
+    position:relative;z-index:5;
+    padding:22px 5vw;
+    display:flex;align-items:center;justify-content:space-between;
+    max-width:1200px;margin:0 auto;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:900;font-size:20px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+  .logo-mark{
+    width:36px;height:36px;background:var(--peach);
+    border:2.5px solid var(--ink);border-radius:50%;
+    display:grid;place-items:center;box-shadow:3px 3px 0 var(--ink);
+  }
+  .back-link{
+    display:inline-flex;align-items:center;gap:6px;
+    color:var(--ink-soft);text-decoration:none;font-size:14px;font-weight:500;
+    transition:color .2s;
+  }
+  .back-link:hover{color:var(--ink)}
+
+  /* layout */
+  .wrap{
+    position:relative;z-index:2;
+    max-width:680px;
+    margin:0 auto;
+    padding:30px 24px 80px;
+  }
+
+  .head{
+    text-align:center;
+    margin-bottom:40px;
+    opacity:0;transform:translateY(20px);
+    animation:rise .7s .1s forwards;
+  }
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+  .eyebrow{
+    font-family:'Caveat',cursive;
+    color:var(--peach);font-size:24px;
+    transform:rotate(-2deg);display:inline-block;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:800;
+    font-size:clamp(36px,5vw,52px);
+    letter-spacing:-.03em;line-height:1;
+    margin:8px 0 14px;
+  }
+  h1 em{color:var(--peach);font-style:italic;font-weight:600}
+  .head p{color:var(--ink-soft);max-width:480px;margin:0 auto;font-size:16px}
+
+  /* progress bar */
+  .progress-wrap{
+    background:var(--cream);
+    border:2px solid var(--ink);
+    border-radius:14px;
+    padding:14px 18px;
+    box-shadow:4px 4px 0 var(--ink);
+    margin-bottom:32px;
+    opacity:0;transform:translateY(20px);
+    animation:rise .7s .2s forwards;
+  }
+  .progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .progress-label{font-size:13px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em}
+  .progress-count{font-family:'Fraunces',serif;font-weight:800;font-size:18px}
+  .progress-count em{color:var(--peach);font-style:normal}
+  .bar{
+    width:100%;height:10px;
+    background:var(--sky-wash);
+    border-radius:999px;
+    overflow:hidden;
+    border:1.5px solid var(--ink);
+  }
+  .bar-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--peach),var(--sky));
+    width:0%;
+    transition:width .6s cubic-bezier(.16,.84,.44,1);
+    border-radius:999px;
+  }
+
+  /* task card */
+  .task{
+    background:var(--cream);
+    border:2.5px solid var(--ink);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:5px 5px 0 var(--ink);
+    margin-bottom:18px;
+    transition:all .35s ease;
+    position:relative;
+    opacity:0;transform:translateY(20px);
+  }
+  .task.shown{animation:rise .6s forwards}
+  .task:nth-child(1){animation-delay:.3s}
+  .task:nth-child(2){animation-delay:.4s}
+  .task:nth-child(3){animation-delay:.5s}
+  .task:nth-child(4){animation-delay:.6s}
+
+  .task.locked{
+    opacity:.5;
+    pointer-events:none;
+    filter:grayscale(.3);
+  }
+  .task.locked.shown{opacity:.5}
+  .task.active{
+    box-shadow:6px 6px 0 var(--peach);
+    border-color:var(--ink);
+    transform:translateY(0);
+  }
+  .task.completed{
+    background:#eafbf0;
+    box-shadow:5px 5px 0 var(--success);
+  }
+  .task.completed .step-num{
+    background:var(--success);color:#fff;
+  }
+
+  .task-head{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .step-num{
+    width:42px;height:42px;
+    background:var(--peach);
+    color:var(--ink);
+    border:2.5px solid var(--ink);
+    border-radius:50%;
+    display:grid;place-items:center;
+    font-family:'Fraunces',serif;font-weight:800;font-size:18px;
+    flex-shrink:0;
+    transition:all .3s;
+  }
+  .task.locked .step-num{background:var(--cream)}
+  .task-titlewrap{flex:1;min-width:0}
+  .task h3{
+    font-family:'Fraunces',serif;font-weight:800;
+    font-size:20px;letter-spacing:-.01em;
+    line-height:1.2;
+  }
+  .task .sub{font-size:13px;color:var(--muted);margin-top:2px}
+
+  .lock-badge,.check-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;
+  }
+  .lock-badge{background:var(--cream);border:1.5px solid var(--muted);color:var(--muted)}
+  .check-badge{background:var(--success);color:#fff}
+
+  .task-body{padding-left:56px}
+  .task-body p{font-size:14px;color:var(--ink-soft);margin-bottom:14px}
+  .task-body p a{color:var(--peach);font-weight:600;text-decoration:none}
+  .task-body p a:hover{text-decoration:underline}
+
+  .field-row{display:flex;gap:8px;flex-wrap:wrap}
+  .input{
+    flex:1;min-width:200px;
+    padding:13px 14px;
+    background:#fff;
+    border:2px solid var(--ink);
+    border-radius:10px;
+    font-family:inherit;font-size:14px;
+    color:var(--ink);
+    transition:all .2s;
+  }
+  .input:focus{outline:none;box-shadow:3px 3px 0 var(--peach)}
+  .input::placeholder{color:#b8aea3}
+
+  .btn-task{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:13px 22px;
+    background:var(--peach);color:var(--ink);
+    border:2px solid var(--ink);border-radius:10px;
+    font-family:inherit;font-weight:700;font-size:14px;
+    cursor:pointer;
+    box-shadow:3px 3px 0 var(--ink);
+    transition:all .15s;
+    white-space:nowrap;
+  }
+  .btn-task:hover:not(:disabled){transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+  .btn-task:active:not(:disabled){transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+  .btn-task:disabled{cursor:not-allowed;opacity:.6}
+
+  .btn-secondary{
+    background:#fff;color:var(--ink);
+  }
+
+  .feedback{
+    margin-top:10px;font-size:13px;font-weight:500;
+    display:none;
+  }
+  .feedback.error{color:var(--danger);display:block}
+  .feedback.success{color:var(--success);display:block}
+
+  .external-link{
+    display:inline-flex;align-items:center;gap:6px;
+    color:var(--ink);font-weight:600;font-size:14px;
+    text-decoration:underline;text-decoration-color:var(--peach);
+    text-underline-offset:3px;text-decoration-thickness:2px;
+  }
+
+  /* SUBMIT block */
+  .submit-block{
+    margin-top:28px;
+    background:var(--ink);color:var(--cream);
+    border-radius:20px;
+    padding:28px;
+    text-align:center;
+    opacity:0;transform:translateY(20px);
+    transition:all .5s;
+  }
+  .submit-block.shown{opacity:1;transform:translateY(0)}
+  .submit-block.disabled{opacity:.5;pointer-events:none}
+  .submit-block h3{
+    font-family:'Fraunces',serif;font-weight:800;font-size:22px;
+    color:var(--cream);margin-bottom:8px;
+  }
+  .submit-block p{color:rgba(255,248,238,.7);font-size:14px;margin-bottom:18px}
+  .btn-submit{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:15px 30px;
+    background:var(--peach);color:var(--ink);
+    border:2px solid var(--peach);border-radius:999px;
+    font-family:inherit;font-weight:700;font-size:15px;
+    cursor:pointer;
+    box-shadow:4px 4px 0 var(--cream);
+    transition:all .15s;
+  }
+  .btn-submit:hover:not(:disabled){transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--cream)}
+  .btn-submit:active:not(:disabled){transform:translate(1px,1px);box-shadow:2px 2px 0 var(--cream)}
+  .btn-submit:disabled{cursor:not-allowed;opacity:.5}
+
+  .spinner{
+    width:14px;height:14px;
+    border:2px solid currentColor;
+    border-right-color:transparent;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+    display:inline-block;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* success screen */
+  .success-screen{
+    display:none;
+    text-align:center;
+    padding:40px 20px;
+    animation:rise .6s forwards;
+  }
+  .success-screen.shown{display:block}
+  .success-icon{
+    width:90px;height:90px;
+    background:var(--success);
+    border:3px solid var(--ink);
+    border-radius:50%;
+    display:grid;place-items:center;
+    margin:0 auto 24px;
+    box-shadow:5px 5px 0 var(--ink);
+    animation:pop .6s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes pop{
+    0%{transform:scale(0)}
+    100%{transform:scale(1)}
+  }
+  .success-icon svg{width:46px;height:46px;color:#fff}
+  .success-screen h2{
+    font-family:'Fraunces',serif;font-weight:800;font-size:36px;
+    letter-spacing:-.02em;margin-bottom:12px;
+  }
+  .success-screen p{color:var(--ink-soft);font-size:16px;max-width:420px;margin:0 auto 24px}
+  .success-screen .ticket{
+    background:var(--cream);border:2.5px dashed var(--ink);
+    border-radius:14px;padding:18px;display:inline-block;
+    font-family:'Fraunces',serif;font-weight:700;font-size:14px;
+    margin-bottom:24px;
+  }
+  .success-screen .ticket span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:6px}
+
+  /* divider */
+  .twitter-handle-hint{
+    background:var(--sky-wash);
+    border:1.5px solid var(--sky);
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:13px;
+    margin-bottom:14px;
+    color:var(--ink-soft);
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  .twitter-handle-hint svg{flex-shrink:0;margin-top:1px}
+
+  @media (max-width:560px){
+    .task-body{padding-left:0;padding-top:6px}
+    .task-head{flex-wrap:wrap}
+    h1{font-size:32px}
+    .field-row{flex-direction:column}
+    .btn-task{width:100%;justify-content:center}
+  }
+</style>
+</head>
+<body>
+
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+
+<!-- mini nav -->
+<div class="mini-nav">
+  <a class="logo" href="index.html">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1F1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+        <path d="M6 17c-2 0-4-1.5-4-4 0-2 1-3 2-3.5 0-2 1-4 4-4 1 0 2 .5 2.5 1 .5-.5 1.5-1 2.5-1 3 0 4 2 4 4 1 .5 2 1.5 2 3.5 0 2.5-2 4-4 4"/>
+        <circle cx="9" cy="13" r="1" fill="#1F1A17"/>
+        <circle cx="15" cy="13" r="1" fill="#1F1A17"/>
+        <path d="M11 16c.5.5 1.5.5 2 0"/>
+      </svg>
+    </div>
+    <span>CLOUD BEARS</span>
+  </a>
+  <a class="back-link" href="index.html">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Back to home
+  </a>
+</div>
+
+<!-- MAIN WRAP -->
+<main class="wrap" id="form-view">
+  <div class="head">
+    <span class="eyebrow">waitlist application</span>
+    <h1>Four steps to your <em>spot</em>.</h1>
+    <p>Complete each task in order. Every step is required — applications missing any task will not be reviewed.</p>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-label">Application Progress</span>
+      <span class="progress-count"><em id="completedCount">0</em> / 4 complete</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="progressBar"></div></div>
+  </div>
+
+  <!-- HANDLE HINT -->
+  <div class="twitter-handle-hint">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7FC4E5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <span>Tasks unlock <strong>one at a time</strong>. You must complete each task before the next becomes available.</span>
+  </div>
+
+  <!-- TASK 1: FOLLOW -->
+  <div class="task active shown" data-step="1" id="task1">
+    <div class="task-head">
+      <div class="step-num">1</div>
+      <div class="task-titlewrap">
+        <h3>Follow @CloudBears_NFT on X</h3>
+        <div class="sub">Start by following our official account</div>
+      </div>
+      <span class="lock-badge" id="badge1">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        In Progress
+      </span>
+    </div>
+    <div class="task-body">
+      <p>Click the button below to open our X profile and tap follow. Then enter your X username (without the @) and confirm.</p>
+      <p><a href="https://x.com/CloudBears_NFT" target="_blank" rel="noopener" class="external-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Open @CloudBears_NFT →
+      </a></p>
+      <div class="field-row">
+        <input type="text" class="input" id="handle" placeholder="your_username (without @)" autocomplete="off" />
+        <button class="btn-task" id="verify1">
+          I followed — Verify
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </button>
+      </div>
+      <div class="feedback" id="fb1"></div>
+    </div>
+  </div>
+
+  <!-- TASK 2: LIKE & RETWEET -->
+  <div class="task locked shown" data-step="2" id="task2">
+    <div class="task-head">
+      <div class="step-num">2</div>
+      <div class="task-titlewrap">
+        <h3>Like & Retweet the announcement</h3>
+        <div class="sub">Help spread the word</div>
+      </div>
+      <span class="lock-badge" id="badge2">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Locked
+      </span>
+    </div>
+    <div class="task-body">
+      <p>Open our pinned waitlist announcement, then like ❤️ and retweet 🔁 it.</p>
+      <p><a href="https://x.com/CloudBears_NFT/status/2056072257588408384" target="_blank" rel="noopener" class="external-link" id="tweetLink2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231z"/></svg>
+        Open the tweet →
+      </a></p>
+      <div class="field-row">
+        <button class="btn-task" id="verify2" disabled>
+          I liked & retweeted — Confirm
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </button>
+      </div>
+      <div class="feedback" id="fb2"></div>
+    </div>
+  </div>
+
+  <!-- TASK 3: COMMENT -->
+  <div class="task locked shown" data-step="3" id="task3">
+    <div class="task-head">
+      <div class="step-num">3</div>
+      <div class="task-titlewrap">
+        <h3>Comment on the tweet</h3>
+        <div class="sub">Drop your comment link</div>
+      </div>
+      <span class="lock-badge" id="badge3">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Locked
+      </span>
+    </div>
+    <div class="task-body">
+      <p>Reply to the same tweet with why you love Cloud Bears 🐻. Then copy the direct link to your comment and paste it below.</p>
+      <p><a href="https://x.com/CloudBears_NFT/status/2056072257588408384" target="_blank" rel="noopener" class="external-link" id="tweetLink3">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231z"/></svg>
+        Open the tweet to comment →
+      </a></p>
+      <div class="field-row">
+        <input type="url" class="input" id="commentLink" placeholder="https://x.com/yourname/status/..." autocomplete="off" disabled />
+        <button class="btn-task" id="verify3" disabled>
+          Submit link
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </button>
+      </div>
+      <div class="feedback" id="fb3"></div>
+    </div>
+  </div>
+
+  <!-- TASK 4: WALLET -->
+  <div class="task locked shown" data-step="4" id="task4">
+    <div class="task-head">
+      <div class="step-num">4</div>
+      <div class="task-titlewrap">
+        <h3>Drop your wallet address</h3>
+        <div class="sub">ETH wallet address (0x...)</div>
+      </div>
+      <span class="lock-badge" id="badge4">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Locked
+      </span>
+    </div>
+    <div class="task-body">
+      <p>This is the wallet that will receive your waitlist mint allowance. Make sure it's correct — submissions are final.</p>
+      <div class="field-row">
+        <input type="text" class="input" id="wallet" placeholder="0x..." autocomplete="off" disabled />
+        <button class="btn-task" id="verify4" disabled>
+          Confirm wallet
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </button>
+      </div>
+      <div class="feedback" id="fb4"></div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-block disabled" id="submitBlock">
+    <h3>All four tasks complete? 🎉</h3>
+    <p>Send your application for review. You'll receive a confirmation ticket on screen.</p>
+    <button class="btn-submit" id="submitBtn" disabled>
+      Submit application
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+</main>
+
+<!-- SUCCESS SCREEN -->
+<main class="wrap success-screen" id="success-view">
+  <div class="success-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+  </div>
+  <h2>You're on the list 🐻❄️</h2>
+  <p>Your application has been received. Approved waitlist members get private Discord access and a priority mint window.</p>
+  <div class="ticket">
+    <span>Application ID</span>
+    <strong id="ticketId">CB-000000</strong>
+  </div>
+  <br />
+  <a href="index.html" class="btn-submit" style="background:var(--ink);color:var(--cream);box-shadow:4px 4px 0 var(--peach);border-color:var(--ink);text-decoration:none">
+    ← Back to home
+  </a>
+</main>
+
+<script>
+  /* ============== CONFIGURATION ==============
+     Paste your deployed Apps Script Web App URL here.
+     Leave blank during testing - submissions will just log to console.
+  */
+  const APPS_SCRIPT_URL = ''; // e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
+
+  /* ============== STATE ============== */
+  const state = {
+    step1Done:false,
+    step2Done:false,
+    step3Done:false,
+    step4Done:false,
+    data:{
+      handle:'',
+      liked:false,
+      commentLink:'',
+      wallet:''
+    }
+  };
+
+  /* ============== HELPERS ============== */
+  const $ = (id)=>document.getElementById(id);
+
+  function showFeedback(n,msg,type){
+    const el = $('fb'+n);
+    el.textContent = msg;
+    el.className = 'feedback ' + type;
+    if(type==='error'){
+      setTimeout(()=>{ el.className='feedback'; el.textContent=''; },4000);
+    }
+  }
+
+  function updateProgress(){
+    const completed = ['step1Done','step2Done','step3Done','step4Done']
+      .filter(k=>state[k]).length;
+    $('completedCount').textContent = completed;
+    $('progressBar').style.width = (completed*25) + '%';
+
+    if(completed===4){
+      $('submitBlock').classList.remove('disabled');
+      $('submitBtn').disabled = false;
+    }
+  }
+
+  function unlockStep(n){
+    const task = $('task'+n);
+    task.classList.remove('locked');
+    task.classList.add('active');
+    const badge = $('badge'+n);
+    badge.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg> In Progress';
+
+    // enable any disabled controls inside
+    task.querySelectorAll('input,button').forEach(el=>el.disabled=false);
+
+    // scroll into nice view
+    setTimeout(()=>{
+      task.scrollIntoView({behavior:'smooth',block:'center'});
+    },200);
+  }
+
+  function completeStep(n){
+    state['step'+n+'Done'] = true;
+    const task = $('task'+n);
+    task.classList.remove('active');
+    task.classList.add('completed');
+    const badge = $('badge'+n);
+    badge.className = 'check-badge';
+    badge.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg> Complete';
+    // disable controls in this task
+    task.querySelectorAll('input,button').forEach(el=>el.disabled=true);
+    updateProgress();
+    // unlock next
+    if(n<4) unlockStep(n+1);
+  }
+
+  /* ============== TASK 1: handle ============== */
+  $('verify1').addEventListener('click',()=>{
+    let handle = $('handle').value.trim().replace(/^@/,'');
+    if(!handle){
+      showFeedback(1,'Please enter your X username.','error');
+      return;
+    }
+    if(!/^[A-Za-z0-9_]{1,15}$/.test(handle)){
+      showFeedback(1,'Hmm — that doesn\'t look like a valid X username.','error');
+      return;
+    }
+    state.data.handle = handle;
+    showFeedback(1,'Verified! Welcome, @'+handle+' 🐻','success');
+    completeStep(1);
+  });
+
+  /* ============== TASK 2: like + retweet ============== */
+  let task2Clicked = false;
+  $('tweetLink2').addEventListener('click',()=>{
+    task2Clicked = true;
+    // After a brief moment, allow the user to confirm
+    setTimeout(()=>{
+      $('verify2').disabled = false;
+    },1500);
+  });
+  $('verify2').addEventListener('click',()=>{
+    if(!task2Clicked){
+      showFeedback(2,'Please open the tweet first to like & retweet.','error');
+      return;
+    }
+    state.data.liked = true;
+    showFeedback(2,'Nice — thanks for the love ❤️','success');
+    completeStep(2);
+  });
+  // For step 2, the verify button should only become clickable after the user actually clicks the tweet link.
+  // We initialize it disabled-on-unlock by overriding the unlock behavior:
+  const _origUnlock = unlockStep;
+  // (we leave default - user can still click after task1 unlocks; the click-link guard above keeps it honest)
+
+  /* ============== TASK 3: comment link ============== */
+  $('verify3').addEventListener('click',()=>{
+    const link = $('commentLink').value.trim();
+    if(!link){
+      showFeedback(3,'Please paste your comment link.','error');
+      return;
+    }
+    // basic validation - must be an x/twitter status URL
+    const re = /^https?:\/\/(www\.)?(x|twitter)\.com\/[A-Za-z0-9_]+\/status\/\d+/i;
+    if(!re.test(link)){
+      showFeedback(3,'That doesn\'t look like a valid tweet/comment link. It should look like https://x.com/yourname/status/12345...','error');
+      return;
+    }
+    state.data.commentLink = link;
+    showFeedback(3,'Link saved!','success');
+    completeStep(3);
+  });
+
+  /* ============== TASK 4: wallet ============== */
+  $('verify4').addEventListener('click',()=>{
+    const w = $('wallet').value.trim();
+    if(!w){
+      showFeedback(4,'Please drop your wallet address.','error');
+      return;
+    }
+    const isEvm = /^0x[a-fA-F0-9]{40}$/.test(w);
+    if(!isEvm){
+      showFeedback(4,'Hmm — that doesn\'t look like a valid ETH address.','error');
+      return;
+    }
+    state.data.wallet = w;
+    showFeedback(4,'Wallet locked in 🔐','success');
+    completeStep(4);
+  });
+
+  /* ============== SUBMIT ============== */
+  $('submitBtn').addEventListener('click',async ()=>{
+    const btn = $('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+    const payload = {
+      handle: state.data.handle,
+      likedRetweeted: state.data.liked ? 'Yes' : 'No',
+      commentLink: state.data.commentLink,
+      wallet: state.data.wallet,
+      submittedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    };
+
+    // generate a friendly ticket ID
+    const ticketId = 'CB-' + Date.now().toString().slice(-6);
+
+    try{
+      if(APPS_SCRIPT_URL){
+        // Apps Script web apps accept form-encoded bodies without CORS preflight
+        const fd = new FormData();
+        Object.entries(payload).forEach(([k,v])=>fd.append(k,v));
+        fd.append('ticketId', ticketId);
+
+        await fetch(APPS_SCRIPT_URL,{
+          method:'POST',
+          body:fd,
+          mode:'no-cors' // Apps Script web apps redirect; we don't need the response
+        });
+      } else {
+        console.log('[Cloud Bears] No APPS_SCRIPT_URL configured. Payload would be:',payload);
+        await new Promise(r=>setTimeout(r,900));
+      }
+
+      // success
+      $('ticketId').textContent = ticketId;
+      $('form-view').style.display = 'none';
+      $('success-view').classList.add('shown');
+      window.scrollTo({top:0,behavior:'smooth'});
+
+    }catch(err){
+      console.error(err);
+      btn.disabled = false;
+      btn.innerHTML = 'Try again →';
+      alert('Something went wrong while submitting. Please try again.');
+    }
+  });
+</script>
+</body>
+</html>
