@@ -580,7 +580,7 @@
      Paste your deployed Apps Script Web App URL here.
      Leave blank during testing - submissions will just log to console.
   */
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweE-PBa25Zu8JgsLgAKpdJKr4uVfVbc3sWB0s2omlowwrHfKod02LDfUIuLjMyWbb_DA/exec'; // e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIwy8IR8zQqFAGxhP3TaD4oav9FMVxDi8dcttP4597zoxMjJ4Zpi1DNgInpqwZnu34/exec'; // e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
 
   /* ============== STATE ============== */
   const state = {
@@ -616,6 +616,7 @@
 
     if(completed===4){
       $('submitBlock').classList.remove('disabled');
+      $('submitBlock').classList.add('shown');
       $('submitBtn').disabled = false;
     }
   }
@@ -736,10 +737,11 @@
     const params = new URLSearchParams({
       ticketId,
       handle:  state.data.handle,
-      liked:   state.data.liked ? 'Yes' : 'No',
-      comment: state.data.commentLink,
+      likedRetweeted: state.data.liked ? 'Yes' : 'No',
+      commentLink: state.data.commentLink,
       wallet:  state.data.wallet,
-      ts:      new Date().toISOString()
+      submittedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent
     });
 
     try{
