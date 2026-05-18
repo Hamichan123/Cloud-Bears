@@ -297,40 +297,68 @@
   @keyframes spin{to{transform:rotate(360deg)}}
 
   /* success screen */
-  .success-screen{
+  .success-screen{display:none}
+
+  /* full-screen success overlay */
+  .success-overlay{
     display:none;
-    text-align:center;
-    padding:40px 20px;
-    animation:rise .6s forwards;
+    position:fixed;inset:0;z-index:999;
+    background:rgba(31,26,23,0.55);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    align-items:center;justify-content:center;
+    padding:24px;
   }
-  .success-screen.shown{display:block}
+  .success-overlay.shown{display:flex;animation:fadeOverlay .35s ease forwards}
+  @keyframes fadeOverlay{from{opacity:0}to{opacity:1}}
+
+  .success-card{
+    background:var(--cream);
+    border:3px solid var(--ink);
+    border-radius:28px;
+    box-shadow:10px 10px 0 var(--ink);
+    padding:48px 40px;
+    max-width:480px;width:100%;
+    text-align:center;
+    animation:popCard .5s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes popCard{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+
   .success-icon{
     width:90px;height:90px;
     background:var(--success);
     border:3px solid var(--ink);
     border-radius:50%;
     display:grid;place-items:center;
-    margin:0 auto 24px;
+    margin:0 auto 20px;
     box-shadow:5px 5px 0 var(--ink);
-    animation:pop .6s cubic-bezier(.34,1.56,.64,1);
-  }
-  @keyframes pop{
-    0%{transform:scale(0)}
-    100%{transform:scale(1)}
   }
   .success-icon svg{width:46px;height:46px;color:#fff}
-  .success-screen h2{
-    font-family:'Fraunces',serif;font-weight:800;font-size:36px;
-    letter-spacing:-.02em;margin-bottom:12px;
+
+  .success-card h2{
+    font-family:'Fraunces',serif;font-weight:900;
+    font-size:clamp(26px,5vw,34px);
+    letter-spacing:-.02em;line-height:1.1;
+    margin-bottom:10px;
   }
-  .success-screen p{color:var(--ink-soft);font-size:16px;max-width:420px;margin:0 auto 24px}
-  .success-screen .ticket{
-    background:var(--cream);border:2.5px dashed var(--ink);
-    border-radius:14px;padding:18px;display:inline-block;
-    font-family:'Fraunces',serif;font-weight:700;font-size:14px;
-    margin-bottom:24px;
+  .success-card .wallet-note{
+    display:inline-block;
+    background:var(--peach-wash);
+    border:2px solid var(--peach);
+    border-radius:10px;
+    padding:10px 18px;
+    font-size:15px;font-weight:700;
+    color:var(--ink);
+    margin:10px 0 18px;
   }
-  .success-screen .ticket span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:6px}
+  .success-card p{color:var(--ink-soft);font-size:14px;max-width:360px;margin:0 auto 20px}
+  .success-card .ticket{
+    background:var(--cream);border:2px dashed var(--ink);
+    border-radius:12px;padding:14px 20px;display:inline-block;
+    font-family:'Fraunces',serif;font-weight:700;font-size:13px;
+    margin-bottom:22px;
+  }
+  .success-card .ticket span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:4px}
 
   /* divider */
   .twitter-handle-hint{
@@ -528,23 +556,24 @@
 
 </main>
 
-<!-- SUCCESS SCREEN -->
-<main class="wrap success-screen" id="success-view">
-  <div class="success-icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="success-view">
+  <div class="success-card">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2>Application Received 🐻❄️</h2>
+    <div class="wallet-note">Your wallet has been noted ✅</div>
+    <p>We'll review your application and reach out. Priority mint access goes to early approved members — stay cozy.</p>
+    <div class="ticket">
+      <span>Application ID</span>
+      <strong id="ticketId">CB-000000</strong>
+    </div>
+    <a href="index.html" class="btn-submit" style="display:inline-block;background:var(--ink);color:var(--cream);box-shadow:4px 4px 0 var(--peach);border-color:var(--ink);text-decoration:none">
+      ← Back to home
+    </a>
   </div>
-  <h2>Application Received ✅</h2>
-  <p style="font-size:18px;font-weight:600;color:var(--ink);margin-bottom:8px">Your wallet has been noted.</p>
-  <p>We'll review your application and reach out via Discord. Priority mint access goes to early approved members — stay cozy.</p>
-  <div class="ticket">
-    <span>Application ID</span>
-    <strong id="ticketId">CB-000000</strong>
-  </div>
-  <br />
-  <a href="index.html" class="btn-submit" style="background:var(--ink);color:var(--cream);box-shadow:4px 4px 0 var(--peach);border-color:var(--ink);text-decoration:none">
-    ← Back to home
-  </a>
-</main>
+</div>
 
 <script>
   /* ============== CONFIGURATION ==============
@@ -726,9 +755,8 @@
 
       // success
       $('ticketId').textContent = ticketId;
-      $('form-view').style.display = 'none';
       $('success-view').classList.add('shown');
-      window.scrollTo({top:0,behavior:'smooth'});
+      document.body.style.overflow = 'hidden';
 
     }catch(err){
       console.error(err);
